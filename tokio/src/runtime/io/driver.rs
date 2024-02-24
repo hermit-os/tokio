@@ -54,7 +54,7 @@ pub(crate) struct ReadyEvent {
     pub(super) is_shutdown: bool,
 }
 
-cfg_net_unix!(
+cfg_net_unix_hermit!(
     impl ReadyEvent {
         pub(crate) fn with_ready(&self, ready: Ready) -> Self {
             Self {

@@ -30,8 +30,8 @@ macro_rules! cfg_windows {
 macro_rules! cfg_unix {
     ($($item:item)*) => {
         $(
-            #[cfg(any(all(doc, docsrs), unix))]
-            #[cfg_attr(docsrs, doc(cfg(unix)))]
+            #[cfg(any(all(doc, docsrs), any(unix, target_os = "hermit")))]
+            #[cfg_attr(docsrs, doc(cfg(any(unix, target_os = "hermit"))))]
             $item
         )*
     }
@@ -257,6 +257,16 @@ macro_rules! cfg_net {
         $(
             #[cfg(feature = "net")]
             #[cfg_attr(docsrs, doc(cfg(feature = "net")))]
+            $item
+        )*
+    }
+}
+
+macro_rules! cfg_net_unix_hermit {
+    ($($item:item)*) => {
+        $(
+            #[cfg(all(any(unix, target_os = "hermit"), feature = "net"))]
+            #[cfg_attr(docsrs, doc(cfg(all(any(unix, target_os = "hermit"), feature = "net"))))]
             $item
         )*
     }

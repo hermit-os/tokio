@@ -244,9 +244,12 @@ impl TcpStream {
     /// [`std::net::TcpStream`]: std::net::TcpStream
     /// [`set_nonblocking`]: fn@std::net::TcpStream::set_nonblocking
     pub fn into_std(self) -> io::Result<std::net::TcpStream> {
-        #[cfg(unix)]
+        #[cfg(any(unix, target_os = "hermit"))]
         {
+            #[cfg(unix)]
             use std::os::unix::io::{FromRawFd, IntoRawFd};
+            #[cfg(target_os = "hermit")]
+            use std::os::hermit::io::{FromRawFd, IntoRawFd};
             self.io
                 .into_inner()
                 .map(IntoRawFd::into_raw_fd)
@@ -1371,10 +1374,13 @@ impl fmt::Debug for TcpStream {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "hermit"))]
 mod sys {
     use super::TcpStream;
+    #[cfg(unix)]
     use std::os::unix::prelude::*;
+    #[cfg(target_os = "hermit")]
+    use std::os::hermit::io::{AsFd, AsRawFd, BorrowedFd, RawFd};
 
     impl AsRawFd for TcpStream {
         fn as_raw_fd(&self) -> RawFd {
