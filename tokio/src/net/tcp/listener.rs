@@ -263,9 +263,13 @@ impl TcpListener {
     /// [`std::net::TcpListener`]: std::net::TcpListener
     /// [`set_nonblocking`]: fn@std::net::TcpListener::set_nonblocking
     pub fn into_std(self) -> io::Result<std::net::TcpListener> {
-        #[cfg(unix)]
+        #[cfg(any(unix, target_os = "hermit"))]
         {
+            #[cfg(unix)]
             use std::os::unix::io::{FromRawFd, IntoRawFd};
+            #[cfg(target_os = "hermit")]
+            use std::os::hermit::io::{FromRawFd, IntoRawFd};
+
             self.io
                 .into_inner()
                 .map(IntoRawFd::into_raw_fd)
@@ -396,10 +400,13 @@ impl fmt::Debug for TcpListener {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "hermit"))]
 mod sys {
     use super::TcpListener;
+    #[cfg(unix)]
     use std::os::unix::prelude::*;
+    #[cfg(target_os = "hermit")]
+    use std::os::hermit::io::{AsFd, AsRawFd, BorrowedFd, RawFd};
 
     impl AsRawFd for TcpListener {
         fn as_raw_fd(&self) -> RawFd {

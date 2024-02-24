@@ -4,6 +4,8 @@ use std::fmt;
 use std::io;
 use std::net::SocketAddr;
 
+#[cfg(target_os = "hermit")]
+use std::os::hermit::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(unix)]
 use std::os::unix::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, RawFd};
 use std::time::Duration;
@@ -467,6 +469,7 @@ impl TcpSocket {
     #[cfg(not(any(
         target_os = "fuchsia",
         target_os = "redox",
+        taregt_os = "hermit",
         target_os = "solaris",
         target_os = "illumos",
     )))]
@@ -475,6 +478,7 @@ impl TcpSocket {
         doc(cfg(not(any(
             target_os = "fuchsia",
             target_os = "redox",
+            taregt_os = "hermit",
             target_os = "solaris",
             target_os = "illumos",
         ))))
@@ -495,6 +499,7 @@ impl TcpSocket {
         target_os = "fuchsia",
         target_os = "redox",
         target_os = "solaris",
+        target_os = "hermit",
         target_os = "illumos",
     )))]
     #[cfg_attr(
@@ -502,6 +507,7 @@ impl TcpSocket {
         doc(cfg(not(any(
             target_os = "fuchsia",
             target_os = "redox",
+            target_os = "hermit",
             target_os = "solaris",
             target_os = "illumos",
         ))))
@@ -635,7 +641,7 @@ impl TcpSocket {
     /// ```
     pub async fn connect(self, addr: SocketAddr) -> io::Result<TcpStream> {
         if let Err(err) = self.inner.connect(&addr.into()) {
-            #[cfg(unix)]
+            #[cfg(any(unix, target_os = "hermit"))]
             if err.raw_os_error() != Some(libc::EINPROGRESS) {
                 return Err(err);
             }
@@ -644,9 +650,12 @@ impl TcpSocket {
                 return Err(err);
             }
         }
-        #[cfg(unix)]
+        #[cfg(any(unix, target_os = "hermit"))]
         let mio = {
+            #[cfg(unix)]
             use std::os::unix::io::{FromRawFd, IntoRawFd};
+            #[cfg(target_os = "hermit")]
+            use std::os::hermit::io::{FromRawFd, IntoRawFd};
 
             let raw_fd = self.inner.into_raw_fd();
             unsafe { mio::net::TcpStream::from_raw_fd(raw_fd) }
@@ -700,9 +709,12 @@ impl TcpSocket {
     /// ```
     pub fn listen(self, backlog: u32) -> io::Result<TcpListener> {
         self.inner.listen(backlog as i32)?;
-        #[cfg(unix)]
+        #[cfg(any(unix, target_os = "hermit"))]
         let mio = {
+            #[cfg(unix)]
             use std::os::unix::io::{FromRawFd, IntoRawFd};
+            #[cfg(target_os = "hermit")]
+            use std::os::hermit::io::{FromRawFd, IntoRawFd};
 
             let raw_fd = self.inner.into_raw_fd();
             unsafe { mio::net::TcpListener::from_raw_fd(raw_fd) }
@@ -753,9 +765,12 @@ impl TcpSocket {
     /// }
     /// ```
     pub fn from_std_stream(std_stream: std::net::TcpStream) -> TcpSocket {
-        #[cfg(unix)]
+        #[cfg(any(unix, target_os = "hermit"))]
         {
+            #[cfg(unix)]
             use std::os::unix::io::{FromRawFd, IntoRawFd};
+            #[cfg(target_os = "hermit")]
+            use std::os::hermit::io::{FromRawFd, IntoRawFd};
 
             let raw_fd = std_stream.into_raw_fd();
             unsafe { TcpSocket::from_raw_fd(raw_fd) }

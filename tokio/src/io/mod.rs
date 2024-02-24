@@ -240,7 +240,7 @@ cfg_aio! {
     }
 }
 
-cfg_net_unix! {
+cfg_net_unix_hermit! {
     mod async_fd;
 
     pub mod unix {

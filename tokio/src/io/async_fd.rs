@@ -2,11 +2,17 @@ use crate::io::{Interest, Ready};
 use crate::runtime::io::{ReadyEvent, Registration};
 use crate::runtime::scheduler;
 
+#[cfg(target_os = "hermit")]
+use mio::hermit::SourceFd;
+#[cfg(unix)]
 use mio::unix::SourceFd;
 use std::error::Error;
 use std::fmt;
 use std::io;
-use std::os::unix::io::{AsRawFd, RawFd};
+#[cfg(target_os = "hermit")]
+use std::os::hermit::io::{AsFd, AsRawFd, BorrowedFd, RawFd};
+#[cfg(unix)]
+use std::os::unix::io::{AsFd, AsRawFd, BorrowedFd, RawFd};
 use std::task::{ready, Context, Poll};
 
 /// Associates an IO object backed by a Unix file descriptor with the tokio
@@ -849,9 +855,9 @@ impl<T: AsRawFd> AsRawFd for AsyncFd<T> {
     }
 }
 
-impl<T: AsRawFd> std::os::unix::io::AsFd for AsyncFd<T> {
-    fn as_fd(&self) -> std::os::unix::io::BorrowedFd<'_> {
-        unsafe { std::os::unix::io::BorrowedFd::borrow_raw(self.as_raw_fd()) }
+impl<T: AsRawFd> AsFd for AsyncFd<T> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        unsafe { BorrowedFd::borrow_raw(self.as_raw_fd()) }
     }
 }
 
