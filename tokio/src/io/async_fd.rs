@@ -8,7 +8,7 @@ use mio::hermit::SourceFd;
 use mio::unix::SourceFd;
 use std::io;
 #[cfg(unix)]
-use std::os::unix::io::{AdFd, AsRawFd, BorrowedFd, RawFd};
+use std::os::unix::io::{AsFd, AsRawFd, BorrowedFd, RawFd};
 #[cfg(target_os = "hermit")]
 use std::os::hermit::io::{AsFd, AsRawFd, BorrowedFd, RawFd};
 use std::{task::Context, task::Poll};
