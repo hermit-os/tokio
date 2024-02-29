@@ -187,7 +187,7 @@ feature! {
                         // that the socket buffer has been drained.  Unfortunately this assumption
                         // fails for level-triggered selectors (like on Windows or poll even for
                         // UNIX): https://github.com/tokio-rs/tokio/issues/5866
-                        if n > 0 && (!cfg!(windows) && !cfg!(mio_unsupported_force_poll_poll) && n < len) {
+                        if n > 0 && !((cfg!(windows) || cfg!(target_os = "hermit"))&& !cfg!(mio_unsupported_force_poll_poll) && n < len) {
                             self.registration.clear_readiness(evt);
                         }
 
@@ -220,7 +220,7 @@ feature! {
                         // that the socket buffer is full.  Unfortunately this assumption
                         // fails for level-triggered selectors (like on Windows or poll even for
                         // UNIX): https://github.com/tokio-rs/tokio/issues/5866
-                        if n > 0 && (!cfg!(windows) && !cfg!(mio_unsupported_force_poll_poll) && n < buf.len()) {
+                        if n > 0 && (!(cfg!(windows) || cfg!(target_os = "hermit")) && !cfg!(mio_unsupported_force_poll_poll) && n < buf.len()) {
                             self.registration.clear_readiness(evt);
                         }
 
