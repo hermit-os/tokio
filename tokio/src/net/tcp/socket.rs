@@ -625,7 +625,7 @@ impl TcpSocket {
     #[cfg(not(any(
         target_os = "fuchsia",
         target_os = "redox",
-        taregt_os = "hermit",
+        target_os = "hermit",
         target_os = "solaris",
         target_os = "illumos",
         target_os = "haiku"
@@ -635,7 +635,7 @@ impl TcpSocket {
         doc(cfg(not(any(
             target_os = "fuchsia",
             target_os = "redox",
-            taregt_os = "hermit",
+            target_os = "hermit",
             target_os = "solaris",
             target_os = "illumos",
             target_os = "haiku"
@@ -996,7 +996,7 @@ impl fmt::Debug for TcpSocket {
 
 // These trait implementations can't be build on Windows, so we completely
 // ignore them, even when building documentation.
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "hermit"))]
 cfg_unix! {
     impl AsRawFd for TcpSocket {
         fn as_raw_fd(&self) -> RawFd {
