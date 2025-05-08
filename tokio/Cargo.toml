@@ -113,7 +113,7 @@ libc = { version = "0.2.168", optional = true }
 signal-hook-registry = { version = "1.1.1", optional = true }
 
 [target.'cfg(target_os = "hermit")'.dependencies]
-libc = { package = "hermit-abi", version = "0.3.8" }
+libc = { package = "hermit-abi", version = "0.5" }
 
 [target.'cfg(unix)'.dev-dependencies]
 libc = { version = "0.2.168" }
